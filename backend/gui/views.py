@@ -1,3 +1,49 @@
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+#user info endpoints
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_info(request):
+    user = request.user
+    return Response({
+        'username': user.username,
+        'email': user.email,
+    })
+from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
+
+#registration serializer
+from rest_framework import serializers as drf_serializers
+class RegisterSerializer(drf_serializers.ModelSerializer):
+    password = drf_serializers.CharField(write_only=True)
+    class Meta:
+        model = User
+        fields = ('username', 'password', 'email')
+
+    def validate_email(self, value):
+        #allowing any email address...for now...
+        return value
+
+    def create(self, validated_data):
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+            email=validated_data.get('email', '')
+        )
+        return user
+
+#registration API view
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'User registered successfully'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 from celery.result import AsyncResult
 from .models import PredictionModel
 from rest_framework.views import APIView
@@ -68,7 +114,7 @@ def export_settings(request):
         theme = data.get('theme')
         save_model = data.get('save_model')
         save_folder = data.get('save_folder')
-        # Save to Profile or handle as needed
+        #save to profile or handle as needed
         return JsonResponse({'status': 'ok'})
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)

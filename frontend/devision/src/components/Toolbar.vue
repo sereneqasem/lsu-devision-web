@@ -14,7 +14,6 @@ console.log("Toolbar Loaded!")
                 <b-button as="router-link" to="/settings" squared>Settings</b-button>
                 <b-button as="router-link" to="/help" squared>Help</b-button>
                 <b-button as="router-link" to="/contact" squared>Contact</b-button>
-                <b-button as="router-link" to="/login" squared>Login</b-button>
                 <b-button as="router-link" to="/account" squared>Account</b-button>
             </b-button-group>
         </b-button-toolbar>

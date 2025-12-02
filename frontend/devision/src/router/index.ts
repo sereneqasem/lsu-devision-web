@@ -57,4 +57,19 @@ const router = createRouter({
   ],
 })
 
+//navigation guard to require login for all routes except /login
+router.beforeEach((to, from, next) => {
+  const publicPages = ['/login']
+  const authRequired = !publicPages.includes(to.path)
+  const loggedIn = !!localStorage.getItem('access')
+  if (authRequired && !loggedIn) {
+    return next('/login')
+  }
+  //if logged in and trying to access /login, redirect to home
+  if (to.path === '/login' && loggedIn) {
+    return next('/')
+  }
+  next()
+})
+
 export default router
